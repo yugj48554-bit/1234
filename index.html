@@ -3,84 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LumenPath | Imperial Zenith AI Engine</title>
+    <title>LumenPath | Zenit Intelligence</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;600;800&family=Playfair+Display:ital,wght@0,700;1,700&family=JetBrains+Mono:wght@300;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;600&family=Playfair+Display:ital,wght@0,700;1,700&family=JetBrains+Mono&display=swap" rel="stylesheet">
 
     <style>
-        :root { --royal-gold: #d4af37; --gold-glow: rgba(212, 175, 55, 0.3); }
-        body { font-family: 'Inter', sans-serif; background: #010806; color: white; min-height: 100vh; cursor: crosshair; overflow-x: hidden; }
+        :root { --gold: #d4af37; }
+        body { 
+            background: #020617; 
+            color: #f8fafc; 
+            font-family: 'Inter', sans-serif; 
+            overflow-x: hidden;
+            margin: 0;
+        }
         .royal-font { font-family: 'Playfair Display', serif; }
         .mono { font-family: 'JetBrains Mono', monospace; }
-        
-        .bg-gradient-fixed {
+
+        /* Cinematic Background */
+        .bg-fixed-layer {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at 80% 20%, rgba(6, 78, 59, 0.15) 0%, transparent 40%),
-                        radial-gradient(circle at 20% 80%, rgba(212, 175, 55, 0.05) 0%, transparent 40%);
+            background: radial-gradient(circle at 50% -20%, #1e293b 0%, transparent 50%),
+                        radial-gradient(circle at 0% 100%, #0f172a 0%, transparent 50%);
             z-index: -1;
         }
 
-        .glass-3d { 
-            background: rgba(255, 255, 255, 0.01); backdrop-filter: blur(20px); 
-            border: 1px solid rgba(212, 175, 55, 0.1); transition: all 0.5s ease;
+        /* Glassmorphism */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            border-radius: 24px;
+            transition: all 0.3s ease;
         }
-        .glass-3d:hover { border-color: var(--royal-gold); background: rgba(212, 175, 55, 0.02); }
-
-        .scan-beam { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 5px; 
-            background: var(--royal-gold); opacity: 0.1;
-            animation: scan 8s linear infinite; pointer-events: none; z-index: 100;
+        .glass-panel:hover {
+            border-color: rgba(212, 175, 55, 0.4);
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.05);
         }
-        @keyframes scan { from { top: -10%; } to { top: 110%; } }
 
-        .bar-anim { transition: height 1s cubic-bezier(0.4, 0, 0.2, 1); }
-        .view-transition { animation: fadeIn 0.6s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .ticker-move { display: flex; animation: ticker 40s linear infinite; width: max-content; }
-        @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        /* Animated Bar Charts */
+        .bar-grow {
+            transform-origin: bottom;
+            animation: growUp 1.2s cubic-bezier(0.17, 0.67, 0.83, 0.67) forwards;
+        }
+        @keyframes growUp { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+
+        /* Navigation Hover */
+        .nav-link {
+            position: relative;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute; width: 0; height: 1px; bottom: -4px; left: 0;
+            background: var(--gold); transition: width 0.3s;
+        }
+        .nav-link:hover::after { width: 100%; }
+        .nav-active { color: var(--gold) !important; }
+        .nav-active::after { width: 100% !important; }
     </style>
 </head>
 <body>
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState } = React;
+        const { useState, useEffect } = React;
 
         const App = () => {
             const [isLoggedIn, setIsLoggedIn] = useState(false);
-            const [view, setView] = useState('hero');
-            const [activeSkillSet, setActiveSkillSet] = useState('WebDev');
+            const [currentView, setCurrentView] = useState('hero');
+            const [activeDojoTab, setActiveDojoTab] = useState('AI_ENGINEERING');
 
-            const companies = [
-                { id: "rag_python", name: "Python AI (RAG)", pay: "₹1,50,000", focus: "Agentic Workflows", growth: [40, 65, 85, 100], demand: 92 },
-                { id: "openai", name: "OpenAI Labs", pay: "₹24,00,000", focus: "AGI / GPT-5", growth: [20, 45, 85, 98], demand: 45 },
-                { id: "nvidia", name: "NVIDIA India", pay: "₹4,50,000", focus: "CUDA / H100", growth: [30, 60, 75, 92], demand: 78 },
-                { id: "meta", name: "Meta AI", pay: "₹18,00,000", focus: "Llama / PyTorch", growth: [35, 55, 88, 99], demand: 62 }
+            // --- DATA SOURCE ---
+            const nodeData = [
+                { id: 1, name: "Neural Architect", pay: "₹2,40,000", demand: "High", growth: [30, 45, 75, 95], focus: "LLM Fine-tuning" },
+                { id: 2, name: "RAG Specialist", pay: "₹1,85,000", demand: "Extreme", growth: [20, 60, 85, 100], focus: "Vector DBs" },
+                { id: 3, name: "Prompt Engineer", pay: "₹95,000", demand: "Stable", growth: [50, 65, 70, 80], focus: "Logic Orchestration" },
+                { id: 4, name: "Agentic Developer", pay: "₹3,10,000", demand: "Critical", growth: [15, 40, 90, 100], focus: "AutoGPT / CrewAI" }
             ];
 
-            const skills = {
-                WebDev: [
-                    { name: 'Python/AI', val: 85 }, { name: 'Vector DB', val: 90 }, { name: 'React', val: 40 }
+            const dojoSkills = {
+                AI_ENGINEERING: [
+                    { label: "Python Mastery", level: 85 },
+                    { label: "Transformer Logic", level: 60 },
+                    { label: "Deployment (Vercel)", level: 92 }
                 ],
-                DataScience: [
-                    { name: 'PyTorch', val: 95 }, { name: 'Statistics', val: 70 }, { name: 'Deployment', val: 80 }
+                DATA_STRATEGY: [
+                    { label: "Statistical Weighting", level: 40 },
+                    { label: "Data Cleaning", level: 75 },
+                    { label: "SQL/NoSQL", level: 88 }
                 ]
             };
 
+            // --- COMPONENTS ---
+            const Navigation = () => (
+                <nav className="fixed top-0 w-full z-50 px-10 py-6 flex justify-between items-center bg-slate-950/50 backdrop-blur-xl border-b border-white/5">
+                    <div className="flex items-center gap-3 cursor-pointer" onClick={() => setCurrentView('hero')}>
+                        <div className="w-8 h-8 border border-yellow-600 rounded-full flex items-center justify-center text-yellow-500 font-bold">L</div>
+                        <span className="royal-font text-xl tracking-tighter font-bold uppercase italic">LumenPath</span>
+                    </div>
+                    <div className="flex gap-10 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                        {['Compare', 'Trajectory', 'Dojo'].map(item => (
+                            <span 
+                                key={item}
+                                onClick={() => setCurrentView(item.toLowerCase())}
+                                className={`nav-link ${currentView === item.toLowerCase() ? 'nav-active' : ''}`}
+                            >
+                                {item}
+                            </span>
+                        ))}
+                        <button onClick={() => setIsLoggedIn(false)} className="text-red-500/50 hover:text-red-500 transition-colors">Terminate</button>
+                    </div>
+                </nav>
+            );
+
+            // --- VIEWS ---
             if (!isLoggedIn) {
                 return (
-                    <div className="min-h-screen flex items-center justify-center p-6">
-                        <div className="bg-gradient-fixed"></div>
-                        <div className="glass-3d p-12 rounded-[40px] w-full max-w-md text-center">
-                            <h1 className="royal-font text-3xl mb-8 italic font-bold">Imperial Login</h1>
+                    <div className="h-screen flex items-center justify-center bg-fixed-layer">
+                        <div className="glass-panel p-12 w-full max-w-md text-center">
+                            <h2 className="royal-font text-3xl mb-8 italic">Imperial Access</h2>
                             <form onSubmit={(e) => { e.preventDefault(); setIsLoggedIn(true); }} className="space-y-4">
-                                <input type="text" placeholder="ID" className="w-full bg-white/5 border border-white/10 p-4 rounded-full outline-none focus:border-yellow-500" required />
-                                <input type="password" placeholder="CIPHER" className="w-full bg-white/5 border border-white/10 p-4 rounded-full outline-none focus:border-yellow-500" required />
-                                <button className="w-full py-4 bg-yellow-600 text-black font-bold rounded-full uppercase tracking-widest text-xs">Authenticate</button>
+                                <input type="text" placeholder="OPERATOR_ID" className="w-full bg-white/5 border border-white/10 p-4 rounded-xl outline-none focus:border-yellow-600 mono text-xs" required />
+                                <input type="password" placeholder="ACCESS_KEY" className="w-full bg-white/5 border border-white/10 p-4 rounded-xl outline-none focus:border-yellow-600 mono text-xs" required />
+                                <button className="w-full py-4 bg-yellow-600 text-black font-bold rounded-xl uppercase tracking-tighter text-sm hover:bg-yellow-500 transition-all">Authenticate</button>
                             </form>
                         </div>
                     </div>
@@ -89,91 +138,116 @@
 
             return (
                 <div className="min-h-screen">
-                    <div className="bg-gradient-fixed"></div>
-                    <div className="scan-beam"></div>
+                    <div className="bg-fixed-layer"></div>
+                    <Navigation />
 
-                    <nav className="fixed top-0 w-full p-8 flex justify-between items-center z-50 bg-black/20 backdrop-blur-md border-b border-white/5">
-                        <div className="royal-font text-xl font-bold cursor-pointer" onClick={() => setView('hero')}>LUMEN<span className="text-yellow-500 italic">PATH</span></div>
-                        <div className="flex gap-8 text-[10px] uppercase font-bold tracking-widest text-white/40">
-                            {['Compare', 'Trajectory', 'Dojo'].map(v => (
-                                <button key={v} onClick={() => setView(v.toLowerCase())} className={view === v.toLowerCase() ? 'text-yellow-500' : ''}>{v}</button>
-                            ))}
-                            <button onClick={() => setIsLoggedIn(false)} className="text-red-800">Exit</button>
-                        </div>
-                    </nav>
-
-                    <main className="pt-32 p-8 max-w-6xl mx-auto">
-                        {view === 'hero' && (
-                            <div className="view-transition text-center py-20">
-                                <h2 className="royal-font text-7xl font-bold italic mb-6">Synthesis</h2>
-                                <p className="mono text-yellow-500/50 text-xs tracking-[0.5em] mb-12">SELECT YOUR COORDINATE</p>
-                                <button onClick={() => setView('compare')} className="border border-yellow-500 text-yellow-500 px-12 py-4 rounded-full hover:bg-yellow-500 hover:text-black transition-all font-bold text-xs uppercase">Initialize Matrix</button>
+                    <main className="pt-32 pb-20 px-8 max-w-6xl mx-auto">
+                        
+                        {/* HERO VIEW */}
+                        {currentView === 'hero' && (
+                            <div className="text-center py-20 animate-fade-in">
+                                <h1 className="royal-font text-8xl font-bold italic mb-6 text-white">Zenith</h1>
+                                <p className="mono text-yellow-500/40 text-sm tracking-[0.8em] mb-12 uppercase">Career Trajectory Engine</p>
+                                <div className="flex justify-center gap-6">
+                                    <button onClick={() => setCurrentView('compare')} className="px-10 py-4 glass-panel border-yellow-600/50 text-yellow-500 font-bold uppercase text-[10px] tracking-widest hover:bg-yellow-600 hover:text-black">Enter Matrix</button>
+                                </div>
                             </div>
                         )}
 
-                        {view === 'compare' && (
-                            <div className="view-transition glass-3d rounded-[30px] overflow-hidden">
-                                <table className="w-full text-left">
-                                    <thead className="bg-white/5 text-yellow-500 text-[10px] uppercase tracking-widest">
-                                        <tr><th className="p-6">Designation</th><th className="p-6">Pay/mo</th><th className="p-6">Demand</th></tr>
-                                    </thead>
-                                    <tbody className="mono text-sm">
-                                        {companies.map(c => (
-                                            <tr key={c.id} className="border-b border-white/5">
-                                                <td className="p-6 font-bold">{c.name}</td>
-                                                <td className="p-6 text-emerald-500">{c.pay}</td>
-                                                <td className="p-6">{c.demand}%</td>
+                        {/* COMPARE VIEW */}
+                        {currentView === 'compare' && (
+                            <div className="animate-fade-in space-y-8">
+                                <h2 className="royal-font text-4xl italic text-yellow-500">Market Nodes</h2>
+                                <div className="glass-panel overflow-hidden">
+                                    <table className="w-full text-left">
+                                        <thead className="bg-white/5 text-yellow-500 text-[10px] uppercase tracking-widest">
+                                            <tr>
+                                                <th className="p-6">Node Name</th>
+                                                <th className="p-6">Est. Monthly Yield</th>
+                                                <th className="p-6">Market Volatility</th>
+                                                <th className="p-6">Focus Area</th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody className="mono text-xs">
+                                            {nodeData.map(node => (
+                                                <tr key={node.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                                                    <td className="p-6 font-bold">{node.name}</td>
+                                                    <td className="p-6 text-emerald-400">{node.pay}</td>
+                                                    <td className="p-6">{node.demand}</td>
+                                                    <td className="p-6 text-slate-400">{node.focus}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         )}
 
-                        {view === 'trajectory' && (
-                            <div className="view-transition grid md:grid-cols-2 gap-8">
-                                {companies.map(c => (
-                                    <div key={c.id} className="glass-3d p-8 rounded-[30px]">
-                                        <h3 className="royal-font text-xl mb-6">{c.name}</h3>
-                                        <div className="flex items-end h-32 gap-3">
-                                            {c.growth.map((g, i) => (
-                                                <div key={i} className="flex-1 bg-yellow-600/30 border-t border-yellow-500 bar-anim" style={{height: `${g}%`}}></div>
+                        {/* TRAJECTORY VIEW */}
+                        {currentView === 'trajectory' && (
+                            <div className="animate-fade-in grid md:grid-cols-2 gap-8">
+                                {nodeData.map(node => (
+                                    <div key={node.id} className="glass-panel p-8">
+                                        <div className="flex justify-between items-center mb-8">
+                                            <h3 className="royal-font text-2xl italic">{node.name}</h3>
+                                            <span className="text-[10px] mono text-yellow-500/50 uppercase">Projected Growth</span>
+                                        </div>
+                                        <div className="flex items-end h-40 gap-4 mb-4">
+                                            {node.growth.map((val, idx) => (
+                                                <div key={idx} className="flex-1 group relative">
+                                                    <div className="bg-yellow-600/20 border-t-2 border-yellow-500/50 bar-grow rounded-t-lg" style={{ height: `${val}%` }}></div>
+                                                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 text-[8px] mono opacity-0 group-hover:opacity-100 transition-opacity">{val}%</div>
+                                                </div>
                                             ))}
                                         </div>
-                                        <div className="flex justify-between mt-4 text-[8px] mono text-white/30">
-                                            <span>INTERN</span><span>JUNIOR</span><span>SENIOR</span><span>ARCHITECT</span>
+                                        <div className="flex justify-between text-[8px] mono text-slate-500 uppercase tracking-tighter">
+                                            <span>Intern</span><span>Junior</span><span>Senior</span><span>Director</span>
                                         </div>
                                     </div>
                                 ))}
                             </div>
                         )}
 
-                        {view === 'dojo' && (
-                            <div className="view-transition space-y-8">
+                        {/* DOJO VIEW */}
+                        {currentView === 'dojo' && (
+                            <div className="animate-fade-in space-y-10">
                                 <div className="flex justify-center gap-4">
-                                    {['WebDev', 'DataScience'].map(s => (
-                                        <button key={s} onClick={() => setActiveSkillSet(s)} className={`px-6 py-2 rounded-full text-[10px] font-bold ${activeSkillSet === s ? 'bg-yellow-600 text-black' : 'bg-white/5'}`}>{s}</button>
+                                    {Object.keys(dojoSkills).map(tab => (
+                                        <button 
+                                            key={tab} 
+                                            onClick={() => setActiveDojoTab(tab)}
+                                            className={`px-8 py-3 rounded-full text-[10px] font-bold tracking-widest transition-all ${activeDojoTab === tab ? 'bg-yellow-600 text-black shadow-lg shadow-yellow-600/20' : 'bg-white/5 text-slate-400'}`}
+                                        >
+                                            {tab.replace('_', ' ')}
+                                        </button>
                                     ))}
                                 </div>
-                                <div className="grid md:grid-cols-2 gap-8">
-                                    <div className="space-y-6">
-                                        {skills[activeSkillSet].map(s => (
-                                            <div key={s.name}>
-                                                <div className="flex justify-between text-[10px] mb-2"><span>{s.name}</span><span>{s.val}%</span></div>
-                                                <div className="h-1 bg-white/5 rounded-full overflow-hidden">
-                                                    <div className="h-full bg-yellow-500" style={{width: `${s.val}%`}}></div>
+                                <div className="grid md:grid-cols-2 gap-12 items-center">
+                                    <div className="space-y-8">
+                                        {dojoSkills[activeDojoTab].map((skill, i) => (
+                                            <div key={i}>
+                                                <div className="flex justify-between text-[10px] mono mb-2 uppercase tracking-widest text-slate-300">
+                                                    <span>{skill.label}</span>
+                                                    <span className="text-yellow-500">{skill.level}% Proficiency</span>
+                                                </div>
+                                                <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                                                    <div className="h-full bg-yellow-600 transition-all duration-1000" style={{ width: `${skill.level}%` }}></div>
                                                 </div>
                                             </div>
                                         ))}
                                     </div>
-                                    <div className="glass-3d p-12 rounded-[40px] text-center">
-                                        <div className="w-16 h-16 border border-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4 italic royal-font text-2xl">Z</div>
-                                        <h4 className="royal-font text-xl">Evolution Analysis</h4>
-                                        <p className="text-xs text-white/40 mt-2">Alignment with Zenith Protocols: 42%</p>
+                                    <div className="glass-panel p-12 text-center relative overflow-hidden">
+                                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-yellow-600 to-transparent opacity-30"></div>
+                                        <div className="w-20 h-20 border-2 border-yellow-600/30 rounded-full flex items-center justify-center mx-auto mb-6">
+                                            <div className="w-12 h-12 border border-yellow-500 rounded-full animate-pulse flex items-center justify-center italic royal-font text-xl">Z</div>
+                                        </div>
+                                        <h3 className="royal-font text-2xl italic mb-2">Synthesis Result</h3>
+                                        <p className="text-xs text-slate-400 mono">Your current profile is 68% compatible with <br/><span className="text-yellow-500 uppercase">Lead AI Engineer</span> protocols.</p>
                                     </div>
                                 </div>
                             </div>
                         )}
+
                     </main>
                 </div>
             );
@@ -184,3 +258,4 @@
     </script>
 </body>
 </html>
+    
