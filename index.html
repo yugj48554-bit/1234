@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LumenPath | Imperial Zenith AI Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;400;600;800&family=Playfair+Display:ital,wght@0,700;1,700&family=JetBrains+Mono:wght@300;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root { --royal-gold: #d4af37; --gold-glow: rgba(212, 175, 55, 0.3); }
+        body { font-family: 'Inter', sans-serif; background: #010806; color: white; min-height: 100vh; cursor: crosshair; overflow-x: hidden; }
+        .royal-font { font-family: 'Playfair Display', serif; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        .bg-gradient-fixed {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 80% 20%, rgba(6, 78, 59, 0.15) 0%, transparent 40%),
+                        radial-gradient(circle at 20% 80%, rgba(212, 175, 55, 0.05) 0%, transparent 40%);
+            z-index: -1;
+        }
+
+        .glass-3d { 
+            background: rgba(255, 255, 255, 0.01); backdrop-filter: blur(20px); 
+            border: 1px solid rgba(212, 175, 55, 0.1); transition: all 0.5s ease;
+        }
+        .glass-3d:hover { border-color: var(--royal-gold); background: rgba(212, 175, 55, 0.02); }
+
+        .scan-beam { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 5px; 
+            background: var(--royal-gold); opacity: 0.1;
+            animation: scan 8s linear infinite; pointer-events: none; z-index: 100;
+        }
+        @keyframes scan { from { top: -10%; } to { top: 110%; } }
+
+        .bar-anim { transition: height 1s cubic-bezier(0.4, 0, 0.2, 1); }
+        .view-transition { animation: fadeIn 0.6s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .ticker-move { display: flex; animation: ticker 40s linear infinite; width: max-content; }
+        @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        const App = () => {
+            const [isLoggedIn, setIsLoggedIn] = useState(false);
+            const [view, setView] = useState('hero');
+            const [activeSkillSet, setActiveSkillSet] = useState('WebDev');
+
+            const companies = [
+                { id: "rag_python", name: "Python AI (RAG)", pay: "₹1,50,000", focus: "Agentic Workflows", growth: [40, 65, 85, 100], demand: 92 },
+                { id: "openai", name: "OpenAI Labs", pay: "₹24,00,000", focus: "AGI / GPT-5", growth: [20, 45, 85, 98], demand: 45 },
+                { id: "nvidia", name: "NVIDIA India", pay: "₹4,50,000", focus: "CUDA / H100", growth: [30, 60, 75, 92], demand: 78 },
+                { id: "meta", name: "Meta AI", pay: "₹18,00,000", focus: "Llama / PyTorch", growth: [35, 55, 88, 99], demand: 62 }
+            ];
+
+            const skills = {
+                WebDev: [
+                    { name: 'Python/AI', val: 85 }, { name: 'Vector DB', val: 90 }, { name: 'React', val: 40 }
+                ],
+                DataScience: [
+                    { name: 'PyTorch', val: 95 }, { name: 'Statistics', val: 70 }, { name: 'Deployment', val: 80 }
+                ]
+            };
+
+            if (!isLoggedIn) {
+                return (
+                    <div className="min-h-screen flex items-center justify-center p-6">
+                        <div className="bg-gradient-fixed"></div>
+                        <div className="glass-3d p-12 rounded-[40px] w-full max-w-md text-center">
+                            <h1 className="royal-font text-3xl mb-8 italic font-bold">Imperial Login</h1>
+                            <form onSubmit={(e) => { e.preventDefault(); setIsLoggedIn(true); }} className="space-y-4">
+                                <input type="text" placeholder="ID" className="w-full bg-white/5 border border-white/10 p-4 rounded-full outline-none focus:border-yellow-500" required />
+                                <input type="password" placeholder="CIPHER" className="w-full bg-white/5 border border-white/10 p-4 rounded-full outline-none focus:border-yellow-500" required />
+                                <button className="w-full py-4 bg-yellow-600 text-black font-bold rounded-full uppercase tracking-widest text-xs">Authenticate</button>
+                            </form>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="min-h-screen">
+                    <div className="bg-gradient-fixed"></div>
+                    <div className="scan-beam"></div>
+
+                    <nav className="fixed top-0 w-full p-8 flex justify-between items-center z-50 bg-black/20 backdrop-blur-md border-b border-white/5">
+                        <div className="royal-font text-xl font-bold cursor-pointer" onClick={() => setView('hero')}>LUMEN<span className="text-yellow-500 italic">PATH</span></div>
+                        <div className="flex gap-8 text-[10px] uppercase font-bold tracking-widest text-white/40">
+                            {['Compare', 'Trajectory', 'Dojo'].map(v => (
+                                <button key={v} onClick={() => setView(v.toLowerCase())} className={view === v.toLowerCase() ? 'text-yellow-500' : ''}>{v}</button>
+                            ))}
+                            <button onClick={() => setIsLoggedIn(false)} className="text-red-800">Exit</button>
+                        </div>
+                    </nav>
+
+                    <main className="pt-32 p-8 max-w-6xl mx-auto">
+                        {view === 'hero' && (
+                            <div className="view-transition text-center py-20">
+                                <h2 className="royal-font text-7xl font-bold italic mb-6">Synthesis</h2>
+                                <p className="mono text-yellow-500/50 text-xs tracking-[0.5em] mb-12">SELECT YOUR COORDINATE</p>
+                                <button onClick={() => setView('compare')} className="border border-yellow-500 text-yellow-500 px-12 py-4 rounded-full hover:bg-yellow-500 hover:text-black transition-all font-bold text-xs uppercase">Initialize Matrix</button>
+                            </div>
+                        )}
+
+                        {view === 'compare' && (
+                            <div className="view-transition glass-3d rounded-[30px] overflow-hidden">
+                                <table className="w-full text-left">
+                                    <thead className="bg-white/5 text-yellow-500 text-[10px] uppercase tracking-widest">
+                                        <tr><th className="p-6">Designation</th><th className="p-6">Pay/mo</th><th className="p-6">Demand</th></tr>
+                                    </thead>
+                                    <tbody className="mono text-sm">
+                                        {companies.map(c => (
+                                            <tr key={c.id} className="border-b border-white/5">
+                                                <td className="p-6 font-bold">{c.name}</td>
+                                                <td className="p-6 text-emerald-500">{c.pay}</td>
+                                                <td className="p-6">{c.demand}%</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+
+                        {view === 'trajectory' && (
+                            <div className="view-transition grid md:grid-cols-2 gap-8">
+                                {companies.map(c => (
+                                    <div key={c.id} className="glass-3d p-8 rounded-[30px]">
+                                        <h3 className="royal-font text-xl mb-6">{c.name}</h3>
+                                        <div className="flex items-end h-32 gap-3">
+                                            {c.growth.map((g, i) => (
+                                                <div key={i} className="flex-1 bg-yellow-600/30 border-t border-yellow-500 bar-anim" style={{height: `${g}%`}}></div>
+                                            ))}
+                                        </div>
+                                        <div className="flex justify-between mt-4 text-[8px] mono text-white/30">
+                                            <span>INTERN</span><span>JUNIOR</span><span>SENIOR</span><span>ARCHITECT</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {view === 'dojo' && (
+                            <div className="view-transition space-y-8">
+                                <div className="flex justify-center gap-4">
+                                    {['WebDev', 'DataScience'].map(s => (
+                                        <button key={s} onClick={() => setActiveSkillSet(s)} className={`px-6 py-2 rounded-full text-[10px] font-bold ${activeSkillSet === s ? 'bg-yellow-600 text-black' : 'bg-white/5'}`}>{s}</button>
+                                    ))}
+                                </div>
+                                <div className="grid md:grid-cols-2 gap-8">
+                                    <div className="space-y-6">
+                                        {skills[activeSkillSet].map(s => (
+                                            <div key={s.name}>
+                                                <div className="flex justify-between text-[10px] mb-2"><span>{s.name}</span><span>{s.val}%</span></div>
+                                                <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+                                                    <div className="h-full bg-yellow-500" style={{width: `${s.val}%`}}></div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="glass-3d p-12 rounded-[40px] text-center">
+                                        <div className="w-16 h-16 border border-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4 italic royal-font text-2xl">Z</div>
+                                        <h4 className="royal-font text-xl">Evolution Analysis</h4>
+                                        <p className="text-xs text-white/40 mt-2">Alignment with Zenith Protocols: 42%</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </main>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
